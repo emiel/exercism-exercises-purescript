@@ -41,7 +41,7 @@ triangleMeetsInequality t@{ a, b, c } =
     Right t
 
 isEquilateral :: TriangleSides -> Boolean
-isEquilateral t@{ a, b, c } = a == b && a == c && b == c
+isEquilateral t@{ a, b, c } = a == b && b == c
 
 isIsosceles :: TriangleSides -> Boolean
 isIsosceles t@{ a, b, c } = a == b || a == c || b == c
@@ -50,7 +50,7 @@ isScalene :: TriangleSides -> Boolean
 isScalene t@{ a, b, c } = a /= b && a /= c && b /= c
 
 isTriangle :: TriangleSides -> Either String TriangleSides
-isTriangle t = (triangleHasSize t >>= trianglePositive) >>= triangleMeetsInequality
+isTriangle t = triangleHasSize t >>= trianglePositive >>= triangleMeetsInequality
 
 triangleKind :: Int -> Int -> Int -> Either String Triangle
 triangleKind a b c = case isTriangle { a, b, c } of
