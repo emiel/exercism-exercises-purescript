@@ -1,30 +1,42 @@
 module Bob (hey) where
 
 import Prelude
-import Data.Maybe (Maybe(..))
-import Data.String (length, lastIndexOf, Pattern(..))
-import Data.String.CodeUnits (toCharArray)
-import Data.Char.Unicode (isLetter, isSpace, isUpper)
-import Data.Foldable (all, any)
-import Data.Array (filter)
+import Data.String.Common as String
+import Data.Either as Either
+import Data.String.Regex as Regex
+import Data.String.Regex.Flags (noFlags)
+import Partial.Unsafe as Partial
+
+hey :: String -> String
+hey msg =
+  if isYell msg && isQuestion msg then
+    "Calm down, I know what I'm doing!"
+  else if isQuestion msg then
+    "Sure."
+  else if isYell msg then
+    "Whoa, chill out!"
+  else if isSilence msg then
+    "Fine. Be that way!"
+  else
+    "Whatever."
 
 isQuestion :: String -> Boolean
-isQuestion str = case (lastIndexOf (Pattern "?") str) of
-  Nothing -> false
-  (Just n) -> n == length str - 1
+isQuestion =
+  testRegex "\\?$"
 
 isYell :: String -> Boolean
 isYell str = hasLetter str && allUpper str
   where
-  hasLetter s = any isLetter (toCharArray s)
-  allUpper s = all isUpper (filter isLetter (toCharArray s))
+  hasLetter = testRegex "[a-zA-Z]"
+  allUpper s = String.toUpper s == s
 
 isSilence :: String -> Boolean
-isSilence str = all isSpace (toCharArray str)
+isSilence =
+  testRegex "^[\\s\\t\\n]*$"
 
-hey :: String -> String
-hey s
-  | isYell s = "Whoa, chill out!"
-  | isQuestion s = "Sure."
-  | isSilence s = "Fine. Be that way!"
-  | otherwise = "Whatever."
+testRegex :: String -> String -> Boolean
+testRegex patternStr =
+  Regex.test
+  $ Partial.unsafePartial
+  $ Either.fromRight
+  $ Regex.regex patternStr noFlags
